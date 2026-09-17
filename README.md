@@ -1,4 +1,4 @@
-# Java Rest API Template
+# Java REST API Template
 
 Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box.
 
@@ -11,12 +11,27 @@ Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web,
 sudo apt install openjdk-25-jdk-headless
 ```
 
-**Run the application (first run downloads Gradle, may take a few minutes):**
+**Run or restart the application (first run downloads Gradle, may take a few minutes):**
 ```bash
 ./gradlew bootRun
 ```
 
-## Spring initializr settings
+**Stop the application:**
+```text
+Ctrl+C
+```
+
+**Stop the Gradle daemon JVMs:**
+```bash
+./gradlew --stop
+```
+
+**Run the compiler**
+```bash
+./gradlew compileJava
+```
+
+## Spring Initializr settings
 
 - Project: Gradle - Groovy
 - Language: Java

@@ -1,6 +1,6 @@
 # Java REST API Template
 
-Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box.
+Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with one example endpoint: GET /items returns the items from the database as JSON.
 
 ## Installation
 
@@ -29,6 +29,16 @@ Ctrl+C
 **Run the compiler**
 ```bash
 ./gradlew compileJava
+```
+
+**Run the tests:**
+```bash
+./gradlew test
+```
+
+**Try it (while the app runs):**
+```bash
+curl -i http://localhost:8090/items
 ```
 
 ## Spring Initializr settings

@@ -50,3 +50,11 @@ Ctrl+C
 ## Project notes
 
 Using server port 8090 for this project everywhere as the host 8080 is already occupied by an unrelated process on the dev machine. 
+
+Development now shows Hibernate's SQL in the bootRun console (spring.jpa.show-sql=true).
+
+### Browse the in-memory database (while the app runs):
+```text
+http://localhost:8090/h2-console
+```
+The database resets everytime the app stops.

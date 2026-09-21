@@ -35,4 +35,32 @@ public class ItemService {
         return itemRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
+
+    // Saving: INSERT when the id is empty, UPDATE when the id is set
+    public Item createItem(Item item) {
+        return itemRepository.save(item);
+    }
+
+    // Updating
+    public Item updateItem(Long id, Item item) {
+
+        // Same 404 rule as getItem: a missing row means 404, never a silent create.
+        if (!itemRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        // The URL decides which row is updated; the body never gets to pick a row.
+        item.setId(id);
+        return itemRepository.save(item);
+    }
+
+    // Deleting
+    public void deleteItem(Long id) {
+
+        // deleteById on a missing row throws a raw exception, so we turn it into a 404 ourselves.
+        if (!itemRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        itemRepository.deleteById(id);
+    }
 }

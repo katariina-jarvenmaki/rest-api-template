@@ -38,6 +38,10 @@ public class ItemService {
 
     // Saving: INSERT when the id is empty, UPDATE when the id is set
     public Item createItem(Item item) {
+
+        // POST always creates a fresh row: the body's id, if any, is cleared so
+        // the database assigns one. Same ownership rule as updateItem, mirrored.
+        item.setId(null);
         return itemRepository.save(item);
     }
 

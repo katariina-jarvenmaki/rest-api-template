@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * First endpoint test: boots the real application on a random port and asks
@@ -67,6 +68,27 @@ class ItemControllerTests {
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Test item", response.getBody().getName());
+
+        // Cleanup: delete what we created.
+        rest.delete("/items/" + response.getBody().getId());
+    }
+
+    @Test
+    void createdItemIgnoresIdFromRequestBody() {
+
+        // Arrange: a body that tries to pick its own id.
+        Item sent = new Item();
+        sent.setId(999L);
+        sent.setName("Body-sent id");
+
+        // Act: POST it like any other create.
+        ResponseEntity<Item> response =
+            rest.postForEntity("/items", sent, Item.class);
+
+        // Assert: 201 and the id is database-assigned, never 999.
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNotEquals(999L, response.getBody().getId());
 
         // Cleanup: delete what we created.
         rest.delete("/items/" + response.getBody().getId());

@@ -1,13 +1,13 @@
-# Spring initializr settings
+# Spring Initializr settings
 
 - Project: Gradle - Groovy
 - Language: Java
 - Spring Boot: 4.1.1
 
-## Project Metadata: 
+## Project Metadata:
 
 - Group: com.restapitemplate
-- Artfact: rest-api-template
+- Artifact: rest-api-template
 - Package name: com.restapitemplate.restapitemplate
 - Packaging: Jar
 - Configuration: Properties

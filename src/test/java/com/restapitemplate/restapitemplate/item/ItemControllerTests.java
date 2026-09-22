@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.TestRestTemplate;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;    
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpEntity;
@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * First endpoint test: boots the real application on a random port and asks
@@ -35,12 +36,22 @@ class ItemControllerTests {
     @Autowired
     private TestRestTemplate rest;
 
+    // The response body must end with a newline, so terminal output from curl
+    // does not glue the JSON to the next line.
+    private void bodyEndsWithNewline(ResponseEntity<String> response) {
+
+        String body = response.getBody();
+        assertNotNull(body);
+        assertTrue(body.endsWith("\n"),
+            "JSON body should end with a newline");
+    }
+
     @Test
     void listIsEmptyBeforeAnythingIsStored() {
 
         ResponseEntity<String> response = rest.getForEntity("/items", String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("[]", response.getBody());
+        bodyEndsWithNewline(response);
     }
 
     @Test
@@ -50,6 +61,7 @@ class ItemControllerTests {
         // 999 never exists, so H2 is fresh at every boot.
         ResponseEntity<String> response = rest.getForEntity("/items/999", String.class);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        bodyEndsWithNewline(response);
     }
 
     @Test

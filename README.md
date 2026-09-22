@@ -1,6 +1,6 @@
 # Java REST API Template
 
-Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with two example endpoints: GET /items lists all items and GET /items/{id} returns one item as JSON.
+Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with five example endpoints: GET /items, GET /items/{id}, POST /items, PUT /items/{id} and DELETE /items/{id}.
 
 ## Installation
 

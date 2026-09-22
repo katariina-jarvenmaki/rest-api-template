@@ -1,9 +1,15 @@
 package com.restapitemplate.restapitemplate.item;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 import java.util.List;
 
 /**
@@ -35,5 +41,25 @@ public class ItemController {
     @GetMapping("/{id}")
     public Item getItem(@PathVariable Long id) {
         return itemService.getItem(id);
+    }
+
+    // Bound POST JSON into an Item so service can save it
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED) // 201 is new resource created and default would be 200
+    public Item createItem(@RequestBody Item item) {
+        return itemService.createItem(item);
+    }
+
+    // Replacing whole rows with URL names. Service 404s if missing.
+    @PutMapping("/{id}")
+    public Item updateItem(@PathVariable Long id, @RequestBody Item item) {
+        return itemService.updateItem(id, item);
+    }
+
+    // Deleting the row so there is nothing to return. Code for success is 204 = success
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteItem(@PathVariable Long id) {
+        itemService.deleteItem(id);
     }
 }

@@ -23,21 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author KatariinaJ
  * @version 2026-09-18
  */
-
-// Compiled only for test runs, never packed into the shipped jar.
-// Makes sure that test boots on a free port
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-// Points TestRestTemplate at the chosen port
 @AutoConfigureTestRestTemplate
-
 class ItemControllerTests {
 
-    // TestRestTemplate auto-aims at the random port, so a "/items" is enough.
     @Autowired
     private TestRestTemplate rest;
 
-    // The response body must end with a newline, so terminal output from curl
-    // does not glue the JSON to the next line.
+    // The response body should end with a newline
     private void bodyEndsWithNewline(ResponseEntity<String> response) {
 
         String body = response.getBody();
@@ -55,10 +48,8 @@ class ItemControllerTests {
     }
 
     @Test
-    // The 404 body is Spring's default, so we only assert the status.
     void missingItemReturns404() {
 
-        // 999 never exists, so H2 is fresh at every boot.
         ResponseEntity<String> response = rest.getForEntity("/items/999", String.class);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         bodyEndsWithNewline(response);
@@ -67,71 +58,58 @@ class ItemControllerTests {
     @Test
     void createdItemIsStoredAndReturns201() {
 
-        // Arranging...
         Item sent = new Item();
         sent.setName("Test item");
         sent.setDescription("Created by a write-path test");
 
-        // Act: Test posting
         ResponseEntity<Item> response =
             rest.postForEntity("/items", sent, Item.class);
 
-        // Assert: 201 and the row came back with a generated id.
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Test item", response.getBody().getName());
 
-        // Cleanup: delete what we created.
         rest.delete("/items/" + response.getBody().getId());
     }
 
     @Test
     void createdItemIgnoresIdFromRequestBody() {
 
-        // Arrange: a body that tries to pick its own id.
         Item sent = new Item();
         sent.setId(999L);
         sent.setName("Body-sent id");
 
-        // Act: POST it like any other create.
         ResponseEntity<Item> response =
             rest.postForEntity("/items", sent, Item.class);
 
-        // Assert: 201 and the id is database-assigned, never 999.
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertNotEquals(999L, response.getBody().getId());
 
-        // Cleanup: delete what we created.
         rest.delete("/items/" + response.getBody().getId());
     }
 
     @Test
     void updatedItemReturnsUpdatedValues() {
 
-        // Arrange: create one row to update.
         Item sent = new Item();
         sent.setName("Original name");
         ResponseEntity<Item> created =
             rest.postForEntity("/items", sent, Item.class);
 
-        // Arrange: the replacement values.
         Item changed = new Item();
         changed.setName("Updated name");
         changed.setDescription("Updated by a write-path test");
 
-        // Act: PUT to the row's own URL.
         ResponseEntity<Item> response = rest.exchange(
             "/items/" + created.getBody().getId(),
             HttpMethod.PUT,
             new HttpEntity<>(changed),
             Item.class);
 
-        // Assert: 200 and the new values.
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Updated name", response.getBody().getName());
 
-        // Cleanup.
         rest.delete("/items/" + created.getBody().getId());
     }
 
@@ -165,7 +143,6 @@ class ItemControllerTests {
     @Test
     void deleteExistingItemReturns204AndRowIsGone() {
 
-        // Arrange: create a row, then delete it.
         Item sent = new Item();
         sent.setName("Doomed row");
         ResponseEntity<Item> created =
@@ -177,11 +154,9 @@ class ItemControllerTests {
             null,
             String.class);
 
-        // Assert: 204 and no body.
         assertEquals(HttpStatus.NO_CONTENT, deleted.getStatusCode());
         assertNull(deleted.getBody());
 
-        // Assert: the row is gone.
         ResponseEntity<String> after =
             rest.getForEntity("/items/" + created.getBody().getId(), String.class);
         assertEquals(HttpStatus.NOT_FOUND, after.getStatusCode());

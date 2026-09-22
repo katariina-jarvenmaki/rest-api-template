@@ -42,4 +42,12 @@ public class TrailingNewlineFilter extends OncePerRequestFilter {
         // Sends the cached body and fixes Content-Length to the new size.
         wrapped.copyBodyToResponse();
     }
+
+    // Error responses (404, 500) are written on a separate ERROR dispatch,
+    // which this filter skips by default. Opting in keeps their JSON bodies
+    // ending with a newline like every other response.
+    @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return false;
+    }
 }

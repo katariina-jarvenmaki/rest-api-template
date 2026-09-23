@@ -13,21 +13,38 @@
     <body>
         <main>
             <h1>Items</h1>
-            <button id="add-button" type="button">Add item</button>
 
             <!-- List view: app.js fills item-rows from GET /items -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody id="item-rows"></tbody>
-            </table>
+            <section id="list-view">
 
-            <p id="empty-message" hidden>No items yet, click "Add item".</p>
+                <button id="add-button" type="button">Add item</button>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <!-- Empty header: the column holds row buttons, nothing to label -->
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="item-rows"></tbody>
+                </table>
+
+                <p id="empty-message" hidden>No items yet, click "Add item".</p>
+            </section>
+
+            <!-- Item view: app.js fills these from GET /items/{id} -->
+            <section id="item-view" hidden>
+
+                <h2 id="item-name"></h2>
+                <p id="item-description"></p>
+                <p id="item-error" hidden></p>
+                <button id="back-button" type="button">Back</button>
+
+            </section>
+
         </main>
 
         <script src="/app.js"></script>

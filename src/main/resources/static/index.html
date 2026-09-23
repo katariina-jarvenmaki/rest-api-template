@@ -41,7 +41,30 @@
                 <h2 id="item-name"></h2>
                 <p id="item-description"></p>
                 <p id="item-error" hidden></p>
+                <button id="item-edit-button" type="button">Edit</button>
                 <button id="back-button" type="button">Back</button>
+
+            </section>
+
+            <!-- Form view: app.js switches the same form between add and edit -->
+            <section id="form-view" hidden>
+
+                <h2 id="form-title"></h2>
+
+                <p>
+                    <label for="name-input">Name</label>
+                    <input id="name-input" type="text">
+                </p>
+
+                <p>
+                    <label for="description-input">Description</label>
+                    <textarea id="description-input" rows="4"></textarea>
+                </p>
+
+                <p id="form-error" hidden></p>
+
+                <button id="save-button" type="button">Save</button>
+                <button id="cancel-button" type="button">Cancel</button>
 
             </section>
 

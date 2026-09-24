@@ -64,6 +64,23 @@ http://localhost:8090/
 ```
 The UI covers the same five operations in the browser: listing, viewing, adding, editing and deleting items. Deleting asks for confirmation first. The page is served by the app from src/main/resources/static and styled with the vendored Simple.css.
 
+### Run in Docker
+
+Build and start, attached to the terminal (Ctrl+C stops the container):
+```bash
+docker compose up --build
+```
+
+Build once, then run detached in the background:
+```bash
+docker compose up -d --build
+```
+
+### Stop the container
+```bash
+docker compose down
+```
+
 ## Spring Initializr settings
 
 - Project: Gradle - Groovy
@@ -85,6 +102,8 @@ The UI covers the same five operations in the browser: listing, viewing, adding,
 Using server port 8090 for this project everywhere as the host 8080 is already occupied by an unrelated process on the dev machine.
 
 Development now shows Hibernate's SQL in the bootRun console (spring.jpa.show-sql=true).
+
+So this API is meant to be same-origin: The UI and the endpoints share the app on port 8090. There is no CORS configuration because of this.
 
 ### Browse the in-memory database (while the app runs):
 ```text

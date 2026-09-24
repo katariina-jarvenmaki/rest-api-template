@@ -9,6 +9,7 @@ const itemError = document.querySelector("#item-error");
 const backButton = document.querySelector("#back-button");
 const addButton = document.querySelector("#add-button");
 const itemEditButton = document.querySelector("#item-edit-button");
+const itemDeleteButton = document.querySelector("#item-delete-button");
 const formView = document.querySelector("#form-view");
 const formTitle = document.querySelector("#form-title");
 const nameInput = document.querySelector("#name-input");
@@ -16,11 +17,17 @@ const descriptionInput = document.querySelector("#description-input");
 const formError = document.querySelector("#form-error");
 const saveButton = document.querySelector("#save-button");
 const cancelButton = document.querySelector("#cancel-button");
+const deleteDialog = document.querySelector("#delete-dialog");
+const deleteMessage = document.querySelector("#delete-message");
+const deleteYesButton = document.querySelector("#delete-yes-button");
+const deleteCancelButton = document.querySelector("#delete-cancel-button");
 
 // null = add mode, a number = edit mode for that item
 let editingId = null;
 // The item shown in the item view, needed when its Edit button is clicked
 let viewingId = null;
+// null = no delete pending, a number = the id the popup would DELETE
+let pendingDeleteId = null;
 
 // Exactly one view is visible at a time
 function showListView() {
@@ -66,6 +73,10 @@ async function loadItems() {
         editButton.textContent = "Edit";
         editButton.addEventListener("click", () => openForm(item.id));
         tdActions.append(editButton);
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => openDeleteDialog(item.id));
+        tdActions.append(deleteButton);
         viewButton.textContent = "View";
         viewButton.addEventListener("click", () => showItem(item.id));
         tdActions.append(viewButton);
@@ -178,6 +189,37 @@ async function saveForm() {
     }
 }
 
+// Fills the message with the id and shows the popup over the current view
+function openDeleteDialog(id) {
+    pendingDeleteId = id;
+    deleteMessage.textContent = "Delete item " + id + "?";
+    deleteDialog.showModal();
+}
+
+// Yes button: sends DELETE, then closes and refreshes the list
+async function confirmDelete() {
+
+    // Nothing pending = the popup was already handled, just close it
+    if (pendingDeleteId === null) {
+        deleteDialog.close();
+        return;
+    }
+
+    const response = await fetch("/items/" + pendingDeleteId, {
+        method: "DELETE"
+    });
+
+    // 404 = someone else already deleted it, the refresh removes the stale row either way
+    if (response.ok || response.status === 404) {
+        pendingDeleteId = null;
+        deleteDialog.close();
+        showListView();
+        loadItems();
+    } else {
+        deleteMessage.textContent = "Delete failed (status " + response.status + ").";
+    }
+}
+
 // Back returns to the list and refreshes it
 backButton.addEventListener("click", () => {
     showListView();
@@ -190,12 +232,19 @@ addButton.addEventListener("click", () => openForm());
 // Edit in the item view opens the form prefilled with the viewed item
 itemEditButton.addEventListener("click", () => openForm(viewingId));
 
+// Delete in the item view opens the same popup
+itemDeleteButton.addEventListener("click", () => openDeleteDialog(viewingId));
+
 // Save and Cancel leave the form, Cancel discards
 saveButton.addEventListener("click", saveForm);
 cancelButton.addEventListener("click", () => {
     showListView();
     loadItems();
 });
+
+// Yes sends the DELETE, Cancel closes without sending
+deleteYesButton.addEventListener("click", confirmDelete);
+deleteCancelButton.addEventListener("click", () => deleteDialog.close());
 
 // The page exists when this runs
 loadItems();

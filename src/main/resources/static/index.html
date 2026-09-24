@@ -42,6 +42,7 @@
                 <p id="item-description"></p>
                 <p id="item-error" hidden></p>
                 <button id="item-edit-button" type="button">Edit</button>
+                <button id="item-delete-button" type="button">Delete</button>
                 <button id="back-button" type="button">Back</button>
 
             </section>
@@ -67,6 +68,15 @@
                 <button id="cancel-button" type="button">Cancel</button>
 
             </section>
+
+            <!-- Delete popup: app.js fills the message and opens it over any view -->
+            <dialog id="delete-dialog">
+
+                <p id="delete-message"></p>
+                <button id="delete-yes-button" type="button">Yes</button>
+                <button id="delete-cancel-button" type="button">Cancel</button>
+
+            </dialog>
 
         </main>
 

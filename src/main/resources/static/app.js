@@ -1,4 +1,3 @@
-// These ids must match index.html
 const rows = document.querySelector("#item-rows");
 const emptyMessage = document.querySelector("#empty-message");
 const listView = document.querySelector("#list-view");
@@ -29,7 +28,6 @@ let viewingId = null;
 // null = no delete pending, a number = the id the popup would DELETE
 let pendingDeleteId = null;
 
-// Exactly one view is visible at a time
 function showListView() {
     listView.hidden = false;
     itemView.hidden = true;
@@ -51,15 +49,12 @@ function showFormView() {
 // Redraws the list view: fetches GET /items, then rebuilds every row
 async function loadItems() {
 
-    // await pauses the function until the API answers, then json() parses the body
     const response = await fetch("/items");
     const items = await response.json();
     rows.innerHTML = "";
 
-    // Rebuilds the whole table from scratch
     for (const item of items) {
 
-        // Rows are built as elements
         const tr = document.createElement("tr");
         const tdId = document.createElement("td");
         tdId.textContent = item.id;
@@ -116,7 +111,6 @@ async function showItem(id) {
 // Opens the form either empty (add) or prefilled (edit)
 function openForm(id) {
 
-    // id given = edit an existing item, no id = add a new one
     if (id === undefined) {
         editingId = null;
         formTitle.textContent = "Add item";
@@ -143,8 +137,7 @@ async function fillForm(id) {
         nameInput.value = item.name;
         descriptionInput.value = item.description;
     } else {
-        formError.textContent = "Loading failed (status " + response.status
-+ ").";
+        formError.textContent = "Loading failed (status " + response.status + ").";
         formError.hidden = false;
     }
 }
@@ -183,8 +176,7 @@ async function saveForm() {
         showListView();
         loadItems();
     } else {
-        formError.textContent = "Saving failed (status " + response.status +
-").";
+        formError.textContent = "Saving failed (status " + response.status + ").";
         formError.hidden = false;
     }
 }
@@ -220,31 +212,24 @@ async function confirmDelete() {
     }
 }
 
-// Back returns to the list and refreshes it
 backButton.addEventListener("click", () => {
     showListView();
     loadItems();
 });
 
-// Add opens the form in add mode
 addButton.addEventListener("click", () => openForm());
 
-// Edit in the item view opens the form prefilled with the viewed item
 itemEditButton.addEventListener("click", () => openForm(viewingId));
 
-// Delete in the item view opens the same popup
 itemDeleteButton.addEventListener("click", () => openDeleteDialog(viewingId));
 
-// Save and Cancel leave the form, Cancel discards
 saveButton.addEventListener("click", saveForm);
 cancelButton.addEventListener("click", () => {
     showListView();
     loadItems();
 });
 
-// Yes sends the DELETE, Cancel closes without sending
 deleteYesButton.addEventListener("click", confirmDelete);
 deleteCancelButton.addEventListener("click", () => deleteDialog.close());
 
-// The page exists when this runs
 loadItems();

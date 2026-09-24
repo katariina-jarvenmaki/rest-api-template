@@ -49,7 +49,7 @@ public class TrailingNewlineFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return "/".equals(request.getRequestURI());
     }
-    
+
     // Error responses (404, 500) are written on a separate ERROR dispatch,
     // which this filter skips by default. Opting in keeps their JSON bodies
     // ending with a newline like every other response.

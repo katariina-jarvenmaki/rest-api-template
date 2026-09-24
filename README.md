@@ -1,6 +1,8 @@
 # Java REST API Template
 
-Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with five example endpoints: GET /items, GET /items/{id}, POST /items, PUT /items/{id} and DELETE /items/{id}.
+Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with five example endpoints: GET /items, GET /items/{id}, POST /items, PUT /items/{id} and DELETE /items/{id}. A small browser UI for the same items is included.
+
+The template has no authentication: the API, the web UI and the h2-console are all open to anyone who can reach the app. Add Spring Security before using it for anything real.
 
 ## Installation
 
@@ -55,6 +57,12 @@ curl -i -X PUT http://localhost:8090/items/1 -H "Content-Type: application/json"
 # Delete: 204, no body
 curl -i -X DELETE http://localhost:8090/items/1
 ```
+
+### Open the web UI (while the app runs):
+```text
+http://localhost:8090/
+```
+The UI covers the same five operations in the browser: listing, viewing, adding, editing and deleting items. Deleting asks for confirmation first. The page is served by the app from src/main/resources/static and styled with the vendored Simple.css.
 
 ## Spring Initializr settings
 

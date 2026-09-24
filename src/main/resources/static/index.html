@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Items</title>
+        <link rel="stylesheet" href="/simple.css">
+    </head>
+
+    <body>
+        <main>
+            <h1>Items</h1>
+
+            <!-- List view: app.js fills item-rows from GET /items -->
+            <section id="list-view">
+
+                <button id="add-button" type="button">Add item</button>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <!-- Empty header: the column holds row buttons, nothing to label -->
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="item-rows"></tbody>
+                </table>
+
+                <p id="empty-message" hidden>No items yet, click "Add item".</p>
+            </section>
+
+            <!-- Item view: app.js fills these from GET /items/{id} -->
+            <section id="item-view" hidden>
+
+                <h2 id="item-name"></h2>
+                <p id="item-description"></p>
+                <p id="item-error" hidden></p>
+                <button id="item-edit-button" type="button">Edit</button>
+                <button id="item-delete-button" type="button">Delete</button>
+                <button id="back-button" type="button">Back</button>
+
+            </section>
+
+            <!-- Form view: app.js switches the same form between add and edit -->
+            <section id="form-view" hidden>
+
+                <h2 id="form-title"></h2>
+
+                <p>
+                    <label for="name-input">Name</label>
+                    <input id="name-input" type="text">
+                </p>
+
+                <p>
+                    <label for="description-input">Description</label>
+                    <textarea id="description-input" rows="4"></textarea>
+                </p>
+
+                <p id="form-error" hidden></p>
+
+                <button id="save-button" type="button">Save</button>
+                <button id="cancel-button" type="button">Cancel</button>
+
+            </section>
+
+            <!-- Delete popup: app.js fills the message and opens it over any view -->
+            <dialog id="delete-dialog">
+
+                <p id="delete-message"></p>
+                <button id="delete-yes-button" type="button">Yes</button>
+                <button id="delete-cancel-button" type="button">Cancel</button>
+
+            </dialog>
+
+        </main>
+
+        <script src="/app.js"></script>
+    </body>
+
+</html>

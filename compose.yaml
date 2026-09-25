@@ -2,6 +2,11 @@ name: rest-api-template
 services:
   app:
     build: .
+    environment:
+      # Container run-mode: Quieter logs and closing database console. quieter logs, database console closed.
+      # Keeping native SQL logging and the console.
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_H2_CONSOLE_ENABLED: "false"
     ports:
       - "127.0.0.1:8090:8090"
     restart: unless-stopped

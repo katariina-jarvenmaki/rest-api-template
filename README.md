@@ -111,3 +111,5 @@ So this API is meant to be same-origin: The UI and the endpoints share the app o
 http://localhost:8090/h2-console
 ```
 The database resets every time the app stops.
+
+In the Docker container the console is closed: the container sets SPRING_H2_CONSOLE_ENABLED=false, the native bootRun keeps it open.

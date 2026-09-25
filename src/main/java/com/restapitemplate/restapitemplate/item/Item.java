@@ -1,6 +1,7 @@
 package com.restapitemplate.restapitemplate.item;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,7 +24,9 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // @NotBlank rejects null, empty and whitespace-only names.
     // nullable=false becomes NOT NULL in the items table.
+    @NotBlank
     @Column(nullable = false)
     private String name;
 

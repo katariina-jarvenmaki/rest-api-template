@@ -1,5 +1,6 @@
 package com.restapitemplate.restapitemplate.item;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,12 +41,12 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Item createItem(@RequestBody Item item) {
+    public Item createItem(@Valid @RequestBody Item item) {
         return itemService.createItem(item);
     }
 
     @PutMapping("/{id}")
-    public Item updateItem(@PathVariable Long id, @RequestBody Item item) {
+    public Item updateItem(@PathVariable Long id, @Valid @RequestBody Item item) {
         return itemService.updateItem(id, item);
     }
 

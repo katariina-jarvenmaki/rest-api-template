@@ -43,7 +43,8 @@ Ctrl+C
 # List items: 200, the list starts empty
 curl -i http://localhost:8090/items
 
-# Create: 201, the database assigns the id (a body-sent id is ignored)
+# Create: 201, the database assigns the id (a body-sent id is ignored);
+# the name is required, a blank or missing name returns 400
 curl -i -X POST http://localhost:8090/items -H "Content-Type: application/json" \
     -d '{"name":"First item","description":"Optional description"}'
 
@@ -63,6 +64,23 @@ curl -i -X DELETE http://localhost:8090/items/1
 http://localhost:8090/
 ```
 The UI covers the same five operations in the browser: listing, viewing, adding, editing and deleting items. Deleting asks for confirmation first. The page is served by the app from src/main/resources/static and styled with the vendored Simple.css.
+
+### Run in Docker
+
+Build and start, attached to the terminal (Ctrl+C stops the container):
+```bash
+docker compose up --build
+```
+
+Build once, then run detached in the background:
+```bash
+docker compose up -d --build
+```
+
+### Stop the container
+```bash
+docker compose down
+```
 
 ## Spring Initializr settings
 
@@ -86,8 +104,12 @@ Using server port 8090 for this project everywhere as the host 8080 is already o
 
 Development now shows Hibernate's SQL in the bootRun console (spring.jpa.show-sql=true).
 
+So this API is meant to be same-origin: The UI and the endpoints share the app on port 8090. There is no CORS configuration because of this.
+
 ### Browse the in-memory database (while the app runs):
 ```text
 http://localhost:8090/h2-console
 ```
 The database resets every time the app stops.
+
+In the Docker container the console is closed: the container sets SPRING_H2_CONSOLE_ENABLED=false, the native bootRun keeps it open.

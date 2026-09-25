@@ -145,7 +145,7 @@ async function fillForm(id) {
 // Sends the form: POST for add, PUT for edit, then back to the list
 async function saveForm() {
 
-    // Browser-side check: the backend 500s on an empty name today
+    // Browser-side check: the backend returns 400 for an empty name
     if (nameInput.value.trim() === "") {
         formError.textContent = "Name must not be empty.";
         formError.hidden = false;

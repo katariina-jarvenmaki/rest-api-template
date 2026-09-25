@@ -90,6 +90,31 @@ class ItemControllerTests {
     }
 
     @Test
+    void blankItemNameReturns400() {
+
+        Item sent = new Item();
+        sent.setName("   ");
+
+        ResponseEntity<String> response =
+            rest.postForEntity("/items", sent, String.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        bodyEndsWithNewline(response);
+    }
+
+    @Test
+    void missingItemNameReturns400() {
+
+        Item sent = new Item();
+
+        ResponseEntity<String> response =
+            rest.postForEntity("/items", sent, String.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        bodyEndsWithNewline(response);
+    }
+
+    @Test
     void updatedItemReturnsUpdatedValues() {
 
         Item sent = new Item();

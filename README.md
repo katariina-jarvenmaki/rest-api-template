@@ -43,7 +43,8 @@ Ctrl+C
 # List items: 200, the list starts empty
 curl -i http://localhost:8090/items
 
-# Create: 201, the database assigns the id (a body-sent id is ignored)
+# Create: 201, the database assigns the id (a body-sent id is ignored);
+# the name is required, a blank or missing name returns 400
 curl -i -X POST http://localhost:8090/items -H "Content-Type: application/json" \
     -d '{"name":"First item","description":"Optional description"}'
 

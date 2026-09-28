@@ -17,6 +17,12 @@ services:
     ports:
       - "127.0.0.1:8090:8090"
     restart: unless-stopped
+    # Hardening: least privilege in the container. App needs no capabilities and
+    # writes nothing to its own filesystem (tmpfs only for /tmp).
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8090/items"]
       interval: 30s
@@ -25,6 +31,12 @@ services:
       start_period: 30s
   db:
     image: postgres:18-alpine
+    # Hardening: the postgres image needs chown caps for its own
+    # startup as the postgres user, so only those are dropped.
+    cap_drop:
+      - MKNOD
+      - NET_RAW
+      - SETFCAP
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}

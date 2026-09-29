@@ -1,10 +1,31 @@
 # Java REST API Template
 
-Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with five example endpoints: `GET /items`, `GET /items/{id}`, `POST /items`, `PUT /items/{id}` and `DELETE /items/{id}`. A small browser UI for the same items is included.
+A REST API and its own browser UI, built with Spring Boot 4 and Java 25 to show a runtime: five CRUD endpoints for items, the schema versioned with Flyway, problem detail error bodies, and a Docker runtime with PostgreSQL. Spring Data JPA, validation and Flyway are wired up, so it boots against H2 out of the box.
 
-Native development and tests run on the embedded H2 with zero setup. Run in Docker, the app connects to a PostgreSQL container from a compose file instead, credentials come from a gitignored .env file and data survives container restarts in a named volume.
+The UI and the API share one origin on port 8090. In native development the boot console shows SQL statements when Hibernate runs, so a request can be traced from the curl line to the database.
 
 The template has no authentication: the API, the web UI and the h2-console are all open to anyone who can reach the app. In Docker the app is published on `127.0.0.1` only, so only local processes reach it, but that limits exposure rather than replacing authentication. Add Spring Security before using it for anything real.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    B["Browser UI<br/>(static page, same origin)"] --> A["Items API<br/>/items, /items/{id}"]
+    A --> S["ItemService"]
+    S --> R["ItemRepository<br/>(Spring Data JPA)"]
+    R --> H2[("H2<br/>native and tests")]
+    R --> PG[("PostgreSQL<br/>docker compose")]
+    F["Flyway migrations<br/>db/migration/V1__create_items.sql"] --> H2
+    F --> PG
+    A -.-> E["GlobalExceptionHandler<br/>problem detail JSON (RFC 9457)"]
+```
+
+### What each piece is for:
+
+- **Migrations.** Flyway applies the versioned SQL in `db/migration` one file serves both H2 and PostgreSQL.
+- **Errors as data.** A `@RestControllerAdvice` returns problem detail JSON for missing ids and validation failures.
+- **Headers.** A single filter adds `nosniff`, a `default-src 'self'`, `no-referrer` and `no-store` to the shared origin.
+- **Least privilege in Docker.** Both containers drop unneeded capabilities and wait for the database healthcheck.
 
 ## Installation
 
@@ -97,6 +118,11 @@ Both containers get a least-privilege runtime: the app drops every capability an
 ```bash
 docker compose down
 ```
+
+## Notes from the build
+
+- **Spring Boot 4 ships auto-configurations.** `flyway-core` and `spring-boot-flyway` are needed to activate Flyway, and `flyway-database-postgresql` for the PostgreSQL dialect.
+- **A volume from before Flyway fails startup on purpose.** It has the tables but no migration history, delete it once with `docker compose down -v`, then volumes get created cleanly.
 
 ## Spring Initializr settings
 

@@ -61,6 +61,8 @@ curl -i -X PUT http://localhost:8090/items/1 -H "Content-Type: application/json"
 curl -i -X DELETE http://localhost:8090/items/1
 ```
 
+Errors come back as problem detail JSON: a missing id is a 404 "Item not found", a blank or missing name is a 400 "Validation failed" with the rejected field.
+
 ### Open the web UI (native app and Docker both run):
 ```text
 http://localhost:8090/

@@ -53,6 +53,8 @@ class ItemControllerTests {
         ResponseEntity<String> response = rest.getForEntity("/items/999", String.class);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         bodyEndsWithNewline(response);
+        assertTrue(response.getBody().contains("\"title\":\"Item not found\""),
+            "404 body should be problem detail JSON titled 'Item not found'");
     }
 
     @Test

@@ -11,8 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 /**
- * Makes every JSON response end with a newline. Terminal tools like curl do
- * not add one, so without this the response body glues to the next prompt.
+ * Makes every JSON response end with a newline. Terminal tools like curl do not add one
  *
  * @author KatariinaJ
  * @version 2026-09-22
@@ -32,9 +31,10 @@ public class TrailingNewlineFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, wrapped);
 
         // Only an existing JSON body gets the newline; a 204 has no body,
-        // so it stays untouched.
         String contentType = wrapped.getContentType();
-        if (contentType != null && contentType.contains("application/json")
+        if (contentType != null
+                && (contentType.contains("application/json")
+                    || contentType.contains("application/problem+json"))
                 && wrapped.getContentAsByteArray().length > 0) {
             wrapped.getOutputStream().write('\n');
         }

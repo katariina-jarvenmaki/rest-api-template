@@ -1,8 +1,10 @@
 # Java REST API Template
 
-Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with five example endpoints: GET /items, GET /items/{id}, POST /items, PUT /items/{id} and DELETE /items/{id}. A small browser UI for the same items is included.
+Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with five example endpoints: `GET /items`, `GET /items/{id}`, `POST /items`, `PUT /items/{id}` and `DELETE /items/{id}`. A small browser UI for the same items is included.
 
-The template has no authentication: the API, the web UI and the h2-console are all open to anyone who can reach the app. Add Spring Security before using it for anything real.
+Native development and tests run on the embedded H2 with zero setup. Run in Docker, the app connects to a PostgreSQL container from a compose file instead, credentials come from a gitignored .env file and data survives container restarts in a named volume.
+
+The template has no authentication: the API, the web UI and the h2-console are all open to anyone who can reach the app. In Docker the app is published on `127.0.0.1` only, so only local processes reach it, but that limits exposure rather than replacing authentication. Add Spring Security before using it for anything real.
 
 ## Installation
 
@@ -59,15 +61,21 @@ curl -i -X PUT http://localhost:8090/items/1 -H "Content-Type: application/json"
 curl -i -X DELETE http://localhost:8090/items/1
 ```
 
-### Open the web UI (while the app runs):
+### Open the web UI (native app and Docker both run):
 ```text
 http://localhost:8090/
 ```
-The UI covers the same five operations in the browser: listing, viewing, adding, editing and deleting items. Deleting asks for confirmation first. The page is served by the app from src/main/resources/static and styled with the vendored Simple.css.
+The UI covers the same five operations in the browser: listing, viewing, adding, editing and deleting items. Deleting asks for confirmation first. The page is served by the app from `src/main/resources/static` and styled with the vendored Simple.css.
 
 ### Run in Docker
 
-Build and start, attached to the terminal (Ctrl+C stops the container):
+PostgreSQL runs alongside the app, configured in one compose file. Copy .env.example to .env and fill in your own values before the first start (the compose file reads `POSTGRES_DB`, `POSTGRES_USER` and `POSTGRES_PASSWORD` from it):
+
+```bash
+cp .env.example .env
+```
+
+Build and start, attached to the terminal (Ctrl+C stops the containers):
 ```bash
 docker compose up --build
 ```
@@ -76,6 +84,12 @@ Build once, then run detached in the background:
 ```bash
 docker compose up -d --build
 ```
+
+The app connects to the database with the `SPRING_DATASOURCE_*` variables set in `compose.yaml`, and Hibernate creates the schema in the database (ddl-auto=update in compose). The Postgres port is not published: only the app container reaches it. The app itself is published on `127.0.0.1:8090`, localhost only.
+
+Data lives in the named volume postgres_data and survives docker compose down and up. Deleting the volume deletes the data.
+
+Both containers get a least-privilege runtime: the app drops every capability and runs with a read-only root filesystem (tmpfs only for /tmp), the database drops a small fixed set of capabilities it does not need.
 
 ### Stop the container
 ```bash
@@ -96,7 +110,7 @@ docker compose down
 - Packaging: Jar
 - Configuration: Properties
 - Java: 25
-- Dependencies: Spring Data JPA, Spring Web, Lombok, Spring Boot DevTools, H2 Database
+- Dependencies: Spring Data JPA, Spring Web, Lombok, Spring Boot DevTools, H2 Database, PostgreSQL Driver
 
 ## Project notes
 
@@ -106,10 +120,10 @@ Development now shows Hibernate's SQL in the bootRun console (spring.jpa.show-sq
 
 So this API is meant to be same-origin: The UI and the endpoints share the app on port 8090. There is no CORS configuration because of this.
 
-### Browse the in-memory database (while the app runs):
+### Browse the in-memory database (native app runs):
 ```text
 http://localhost:8090/h2-console
 ```
 The database resets every time the app stops.
 
-In the Docker container the console is closed: the container sets SPRING_H2_CONSOLE_ENABLED=false, the native bootRun keeps it open.
+Native bootRun keeps the H2 console open. The Docker container sets `SPRING_H2_CONSOLE_ENABLED=false`, so it is closed there, and Docker connects to PostgreSQL instead of H2.

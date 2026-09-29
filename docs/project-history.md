@@ -9,3 +9,4 @@ An overview of the build order and the decisions made along the way.
 3. Made a skeleton of backend on `java_rest_api_backend`: Items API with five-endpoints
 4. Rest Api UI template on `rest_api_ui_template`: a browser UI for the same five operations, styled with vendored Simple.css, three views: List, item and form, plus a delete dialog
 5. Docker setup on `docker_setup`: container packaging, required item names, security headers
+6. PostgreSQL on `postgres_setup`: app + postgres in one compose file, credentials via a gitignored .env file (tracked .env.example placeholder only)

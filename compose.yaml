@@ -7,12 +7,49 @@ services:
       # Keeping native SQL logging and the console.
       SPRING_JPA_SHOW_SQL: "false"
       SPRING_H2_CONSOLE_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8090:8090"
     restart: unless-stopped
+    # Hardening: least privilege in the container. App needs no capabilities and
+    # writes nothing to its own filesystem (tmpfs only for /tmp).
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8090/items"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 30s
+  db:
+    image: postgres:18-alpine
+    # Hardening: the postgres image needs chown caps for its own
+    # startup as the postgres user, so only those are dropped.
+    cap_drop:
+      - MKNOD
+      - NET_RAW
+      - SETFCAP
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:

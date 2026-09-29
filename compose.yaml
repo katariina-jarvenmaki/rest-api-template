@@ -7,7 +7,7 @@ services:
       # Keeping native SQL logging and the console.
       SPRING_JPA_SHOW_SQL: "false"
       SPRING_H2_CONSOLE_ENABLED: "false"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}

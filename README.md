@@ -87,9 +87,9 @@ Build once, then run detached in the background:
 docker compose up -d --build
 ```
 
-The app connects to the database with the `SPRING_DATASOURCE_*` variables set in `compose.yaml`, and Hibernate creates the schema in the database (ddl-auto=update in compose). The Postgres port is not published: only the app container reaches it. The app itself is published on `127.0.0.1:8090`, localhost only.
+The app connects to the database with the `SPRING_DATASOURCE_*` variables set in `compose.yaml`, then Flyway builds the schema by running the migrations in `db/migration`. Migrations work same way on the embedded H2 in native development and tests. Only the app container reaches the Postgres port. The app itself is published on `127.0.0.1:8090`, localhost only.
 
-Data lives in the named volume postgres_data and survives docker compose down and up. Deleting the volume deletes the data.
+Data lives in the volume postgres_data and survives docker compose down and up. Deleting the volume deletes the data. A volume created before Flyway was introduced has no migration history and fails startup. Delete it once and a fresh start is clean.
 
 Both containers get a least-privilege runtime: the app drops every capability and runs with a read-only root filesystem (tmpfs only for /tmp), the database drops a small fixed set of capabilities it does not need.
 

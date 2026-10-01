@@ -34,7 +34,7 @@ public class TrailingNewlineFilter extends OncePerRequestFilter {
         String contentType = wrapped.getContentType();
         if (contentType != null
                 && (contentType.contains("application/json")
-                    || contentType.contains("application/problem+json"))
+                    || contentType.contains("+json"))
                 && wrapped.getContentAsByteArray().length > 0) {
             wrapped.getOutputStream().write('\n');
         }

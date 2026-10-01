@@ -80,6 +80,9 @@ curl -i -X PUT http://localhost:8090/items/1 -H "Content-Type: application/json"
 
 # Delete: 204, no body
 curl -i -X DELETE http://localhost:8090/items/1
+
+# Health probe: 200 {"status":"UP"}
+curl -i http://localhost:8090/actuator/health
 ```
 
 Errors come back as problem detail JSON: a missing id is a 404 "Item not found", a blank or missing name is a 400 "Validation failed" with the rejected field.

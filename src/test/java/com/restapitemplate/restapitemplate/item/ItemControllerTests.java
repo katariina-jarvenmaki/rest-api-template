@@ -40,11 +40,15 @@ class ItemControllerTests {
     }
 
     @Test
-    void listIsEmptyBeforeAnythingIsStored() {
+    void listStartsWithTheSeedRows() {
 
         ResponseEntity<String> response = rest.getForEntity("/items", String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         bodyEndsWithNewline(response);
+        assertTrue(response.getBody().contains("Sample item")
+            && response.getBody().contains("Second sample")
+            && response.getBody().contains("Third sample"),
+            "the items list should contain the three seed rows");
     }
 
     @Test

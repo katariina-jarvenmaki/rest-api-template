@@ -63,7 +63,7 @@ Ctrl+C
 
 **Try the API (while the app runs):**
 ```bash
-# List items: 200, the list starts empty
+# List items: 200, three sample items ship with the template
 curl -i http://localhost:8090/items
 
 # Create: 201, the database assigns the id (a body-sent id is ignored);

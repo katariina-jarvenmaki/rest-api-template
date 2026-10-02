@@ -1,6 +1,7 @@
 package com.restapitemplate.restapitemplate.config;
 
 import com.restapitemplate.restapitemplate.item.Item;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
@@ -96,5 +97,52 @@ class FrameworkErrorTests {
         assertProblemDetail(response, HttpStatus.BAD_REQUEST, "Validation failed");
         assertTrue(response.getBody().contains("\"invalidField\":\"name\""),
             "400 body should point at the name field");
+    }
+
+    @Test
+    void unsupportedMediaTypeReturnsProblemDetail415() {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+
+        ResponseEntity<String> response = rest.exchange(
+            "/items",
+            HttpMethod.POST,
+            new HttpEntity<>("hello", headers),
+            String.class);
+
+        assertProblemDetail(response,
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported media type");
+    }
+
+    @Test
+    void unacceptableAcceptReturnsProblemDetail406() {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(List.of(MediaType.APPLICATION_XML));
+
+        ResponseEntity<String> response = rest.exchange(
+            "/items/1",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            String.class);
+
+        assertProblemDetail(response, HttpStatus.NOT_ACCEPTABLE, "Not acceptable");
+    }
+
+    // Tomcat rejects TRACE before the exception handlers run, so this arrives as /error
+    @Test
+    void traceMethodReturnsProblemDetail405WithSecurityHeaders() {
+
+        ResponseEntity<String> response = rest.exchange(
+            "/items/0",
+            HttpMethod.TRACE,
+            null,
+            String.class);
+
+        assertProblemDetail(response,
+            HttpStatus.METHOD_NOT_ALLOWED, "Method not allowed");
+        assertEquals("nosniff",
+            response.getHeaders().getFirst("X-Content-Type-Options"));
     }
 }

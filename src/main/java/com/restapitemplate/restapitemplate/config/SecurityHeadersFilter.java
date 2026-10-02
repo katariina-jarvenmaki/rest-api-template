@@ -14,7 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * share one origin, so one filter covers both.
  *
  * @author KatariinaJ
- * @version 2026-09-25
+ * @version 2026-10-02
  */
 @Component
 public class SecurityHeadersFilter extends OncePerRequestFilter {
@@ -38,5 +38,11 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
         response.setHeader("Cache-Control", "no-store");
 
         filterChain.doFilter(request, response);
+    }
+
+    // Error responses are written on a ERROR dispatch
+    @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return false;
     }
 }

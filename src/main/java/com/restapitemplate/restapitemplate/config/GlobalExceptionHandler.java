@@ -2,6 +2,8 @@ package com.restapitemplate.restapitemplate.config;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +17,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
  * Turns exceptions from any controller into RFC 9457 "problem detail" JSON, the standard error body format
  *
  * @author KatariinaJ
- * @version 2026-09-29
+ * @version 2026-10-02
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -73,6 +75,24 @@ public class GlobalExceptionHandler {
 
         ProblemDetail body = ProblemDetail.forStatus(HttpStatus.METHOD_NOT_ALLOWED);
         body.setTitle("Method not allowed");
+        return body;
+    }
+
+    // A body in a media type that no converter could read -> 415
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ProblemDetail handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+
+        ProblemDetail body = ProblemDetail.forStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        body.setTitle("Unsupported media type");
+        return body;
+    }
+
+    // An Accept header with no response can satisfy a 406
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public ProblemDetail handleNotAcceptable(HttpMediaTypeNotAcceptableException ex) {
+
+        ProblemDetail body = ProblemDetail.forStatus(HttpStatus.NOT_ACCEPTABLE);
+        body.setTitle("Not acceptable");
         return body;
     }
 }

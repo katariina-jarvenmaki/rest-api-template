@@ -83,7 +83,16 @@ curl -i -X DELETE http://localhost:8090/items/1
 
 # Health probe: 200 {"status":"UP"}
 curl -i http://localhost:8090/actuator/health
+
+# OpenAPI description: 200, the JSON document the Swagger UI reads
+curl -i http://localhost:8090/v3/api-docs
 ```
+
+### Browse the Swagger UI API documentation (native app and Docker both run):
+```text
+http://localhost:8090/swagger-ui.html
+```
+The page lists and lets you try every endpoint from the browser, generated from the code by springdoc. The same document is served as JSON at `/v3/api-docs` for tools.
 
 Errors come back as problem detail JSON: a missing id is a 404 "Item not found", a blank or missing name is a 400 "Validation failed" with the rejected field. Framework-level failures speak the same shape: an unknown route is a 404 "Route not found", malformed JSON a 400 "Malformed request body", a non-numeric id a 400 "Invalid path variable", an unsupported method a 405 "Method not allowed", and a name over 255 characters the 400 "Validation failed".
 

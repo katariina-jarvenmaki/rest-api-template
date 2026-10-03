@@ -1,6 +1,6 @@
 # Java REST API Template
 
-A REST API and its own browser UI, built with Spring Boot 4 and Java 25 to show a runtime: five CRUD endpoints for items, the schema versioned with Flyway, problem detail error bodies, and a Docker runtime with PostgreSQL. Spring Data JPA, validation and Flyway are wired up, so it boots against H2 out of the box.
+A REST API and its own browser UI, built with Spring Boot 4 and Java 25 to show a runtime: five CRUD endpoints for items, the schema versioned with Flyway, problem detail error bodies, interactive API documentation (OpenAPI and Swagger UI), a health endpoint, and a Docker runtime with PostgreSQL. Spring Data JPA, validation, Flyway and actuator are wired up, so it boots against H2 out of the box.
 
 The UI and the API share one origin on port 8090. In native development the boot console shows SQL statements when Hibernate runs, so a request can be traced from the curl line to the database.
 
@@ -22,10 +22,12 @@ flowchart LR
 
 ### What each piece is for:
 
-- **Migrations.** Flyway applies the versioned SQL in `db/migration` one file serves both H2 and PostgreSQL.
+- **Migrations.** Flyway applies the versioned SQL in `db/migration`, one file serves both H2 and PostgreSQL. A second migration seeds the three demo items, applied once per database.
 - **Errors as data.** A `@RestControllerAdvice` returns problem detail JSON for missing ids and validation failures.
 - **Headers.** A single filter adds `nosniff`, a `default-src 'self'`, `no-referrer` and `no-store` to the shared origin.
-- **Least privilege in Docker.** Both containers drop unneeded capabilities and wait for the database healthcheck.
+- **Least privilege in Docker.** Both containers drop unneeded capabilities; the app starts only after the database healthcheck passes.
+- **Quiet discovery.** The `/actuator` link page answers 404; tools aim at `/actuator/health`.
+- **Escaped browser errors.** Error pages served to a browser HTML-escape their titles.
 
 ## Installation
 
@@ -86,7 +88,14 @@ curl -i http://localhost:8090/actuator/health
 
 # OpenAPI description: 200, the JSON document the Swagger UI reads
 curl -i http://localhost:8090/v3/api-docs
+
+# Unknown route: 404 problem detail, and the /actuator link page is 404 too
+curl -i http://localhost:8090/no/such/route
 ```
+
+### Continuous integration
+
+Every push runs `./gradlew test` on Gitea Actions (`.gitea/workflows/tests.yml`, runs-on `gradle`). The tests use H2, so CI needs no services. The repo mirrors to GitHub, where the workflow file is inert.
 
 ### Browse the Swagger UI API documentation (native app and Docker both run):
 ```text
@@ -121,6 +130,8 @@ docker compose up -d --build
 ```
 
 The app connects to the database with the `SPRING_DATASOURCE_*` variables set in `compose.yaml`, then Flyway builds the schema by running the migrations in `db/migration`. Migrations work same way on the embedded H2 in native development and tests. Only the app container reaches the Postgres port. The app itself is published on `127.0.0.1:8090`, localhost only.
+
+Compose sets `SERVER_ADDRESS: "0.0.0.0"` because an environment variable overrides `application.properties`, where the default is `127.0.0.1`. Inside the container that is right: Only the mapped port reaches the app, and it stays localhost-only on the host. A different bind is still winning by setting `SERVER_ADDRESS` in the environment, without touching the properties file.
 
 Data lives in the volume postgres_data and survives docker compose down and up. Deleting the volume deletes the data. A volume created before Flyway was introduced has no migration history and fails startup. Delete it once and a fresh start is clean.
 
@@ -157,6 +168,10 @@ docker compose down
 Using server port 8090 for this project everywhere as the host 8080 is already occupied by an unrelated process on the dev machine.
 
 Development now shows Hibernate's SQL in the bootRun console (spring.jpa.show-sql=true).
+
+Datasource connection is held only inside the request transaction (spring.jpa.open-in-view=false), not for the whole render.
+
+The app shuts down gracefully: Requests finish before the port closes.
 
 So this API is meant to be same-origin: The UI and the endpoints share the app on port 8090. There is no CORS configuration because of this.
 

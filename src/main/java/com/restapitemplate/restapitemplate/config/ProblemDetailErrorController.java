@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.util.HtmlUtils;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -43,9 +44,7 @@ public class ProblemDetailErrorController implements ErrorController {
 
         response.setStatus(status);
         response.setContentType(MediaType.TEXT_HTML_VALUE);
-        response.getWriter().write(
-            "<html><body><h1>" + status + "</h1><p>"
-                + attributes.get("title") + "</p></body></html>\n");
+        response.getWriter().write(errorPage(status, String.valueOf(attributes.get("title"))));
     }
 
     // Every other response is problem detail
@@ -73,5 +72,12 @@ public class ProblemDetailErrorController implements ErrorController {
         }
         // No status attribute means the request never reached a handler
         return 500;
+    }
+
+    // Title becomes markup on HTML pages
+    static String errorPage(int status, String title) {
+
+        return "<html><body><h1>" + status + "</h1><p>"
+            + HtmlUtils.htmlEscape(title) + "</p></body></html>\n";
     }
 }

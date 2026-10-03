@@ -3,6 +3,8 @@ services:
   app:
     build: .
     environment:
+      # Bind all interfaces inside the container
+      SERVER_ADDRESS: "0.0.0.0"
       # Container run-mode: Quieter logs and closing database console. quieter logs, database console closed.
       # Keeping native SQL logging and the console.
       SPRING_JPA_SHOW_SQL: "false"

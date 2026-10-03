@@ -36,4 +36,16 @@ class ActuatorHealthTests {
         assertTrue(response.getBody().contains("\"status\":\"UP\""),
             "health body should report UP");
     }
+
+    // The discovery page stays off
+    @Test
+    void actuatorDiscoveryPageIsNotFound() {
+
+        ResponseEntity<String> response = rest.getForEntity(
+            "/actuator", String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertTrue(response.getBody().contains("\"title\":\"Route not found\""),
+            "the discovery page should land on the problem detail 404");
+    }
 }

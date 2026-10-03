@@ -4,7 +4,7 @@ A REST API and its own browser UI, built with Spring Boot 4 and Java 25 to show 
 
 The UI and the API share one origin on port 8090. In native development the boot console shows SQL statements when Hibernate runs, so a request can be traced from the curl line to the database.
 
-The template has no authentication: the API, the web UI and the h2-console are all open to anyone who can reach the app. In Docker the app is published on `127.0.0.1` only, so only local processes reach it, but that limits exposure rather than replacing authentication. Add Spring Security before using it for anything real.
+This is a template that has no authentication: the API, the web UI and the h2-console are currently all open to anyone who can reach the app. Native boot binds `127.0.0.1` and in Docker the app is then published on `127.0.0.1` only. Only local processes reach it, but that limits exposure rather than replacing authentication. Add Spring Security before using it for anything real.
 
 ## Architecture
 

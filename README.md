@@ -1,10 +1,33 @@
 # Java REST API Template
 
-Generic Java REST API template built with Spring Boot 4 and Java 25. Spring Web, Spring Data JPA and an embedded H2 database are wired up, so it boots out of the box. The template comes with five example endpoints: `GET /items`, `GET /items/{id}`, `POST /items`, `PUT /items/{id}` and `DELETE /items/{id}`. A small browser UI for the same items is included.
+A REST API and its own browser UI, built with Spring Boot 4 and Java 25 to show a runtime: five CRUD endpoints for items, the schema versioned with Flyway, problem detail error bodies, interactive API documentation (OpenAPI and Swagger UI), a health endpoint, and a Docker runtime with PostgreSQL. Spring Data JPA, validation, Flyway and actuator are wired up, so it boots against H2 out of the box.
 
-Native development and tests run on the embedded H2 with zero setup. Run in Docker, the app connects to a PostgreSQL container from a compose file instead, credentials come from a gitignored .env file and data survives container restarts in a named volume.
+The UI and the API share one origin on port 8090. In native development the boot console shows SQL statements when Hibernate runs, so a request can be traced from the curl line to the database.
 
-The template has no authentication: the API, the web UI and the h2-console are all open to anyone who can reach the app. In Docker the app is published on `127.0.0.1` only, so only local processes reach it, but that limits exposure rather than replacing authentication. Add Spring Security before using it for anything real.
+This is a template that has no authentication: the API, the web UI and the h2-console are currently all open to anyone who can reach the app. Native boot binds `127.0.0.1` and in Docker the app is then published on `127.0.0.1` only. Only local processes reach it, but that limits exposure rather than replacing authentication. Add Spring Security before using it for anything real.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    B["Browser UI<br/>(static page, same origin)"] --> A["Items API<br/>/items, /items/{id}"]
+    A --> S["ItemService"]
+    S --> R["ItemRepository<br/>(Spring Data JPA)"]
+    R --> H2[("H2<br/>native and tests")]
+    R --> PG[("PostgreSQL<br/>docker compose")]
+    F["Flyway migrations<br/>db/migration/V1__create_items.sql"] --> H2
+    F --> PG
+    A -.-> E["GlobalExceptionHandler<br/>problem detail JSON (RFC 9457)"]
+```
+
+### What each piece is for:
+
+- **Migrations.** Flyway applies the versioned SQL in `db/migration`, one file serves both H2 and PostgreSQL. A second migration seeds the three demo items, applied once per database.
+- **Errors as data.** A `@RestControllerAdvice` returns problem detail JSON for missing ids and validation failures.
+- **Headers.** A single filter adds `nosniff`, a `default-src 'self'`, `no-referrer` and `no-store` to the shared origin.
+- **Least privilege in Docker.** Both containers drop unneeded capabilities; the app starts only after the database healthcheck passes.
+- **Quiet discovery.** The `/actuator` link page answers 404; tools aim at `/actuator/health`.
+- **Escaped browser errors.** Error pages served to a browser HTML-escape their titles.
 
 ## Installation
 
@@ -42,7 +65,7 @@ Ctrl+C
 
 **Try the API (while the app runs):**
 ```bash
-# List items: 200, the list starts empty
+# List items: 200, three sample items ship with the template
 curl -i http://localhost:8090/items
 
 # Create: 201, the database assigns the id (a body-sent id is ignored);
@@ -59,7 +82,28 @@ curl -i -X PUT http://localhost:8090/items/1 -H "Content-Type: application/json"
 
 # Delete: 204, no body
 curl -i -X DELETE http://localhost:8090/items/1
+
+# Health probe: 200 {"status":"UP"}
+curl -i http://localhost:8090/actuator/health
+
+# OpenAPI description: 200, the JSON document the Swagger UI reads
+curl -i http://localhost:8090/v3/api-docs
+
+# Unknown route: 404 problem detail, and the /actuator link page is 404 too
+curl -i http://localhost:8090/no/such/route
 ```
+
+### Continuous integration
+
+Every push runs `./gradlew test` on Gitea Actions (`.gitea/workflows/tests.yml`, runs-on `gradle`). The tests use H2, so CI needs no services. The repo mirrors to GitHub, where the workflow file is inert.
+
+### Browse the Swagger UI API documentation (native app and Docker both run):
+```text
+http://localhost:8090/swagger-ui.html
+```
+The page lists and lets you try every endpoint from the browser, generated from the code by springdoc. The same document is served as JSON at `/v3/api-docs` for tools.
+
+Errors come back as problem detail JSON: a missing id is a 404 "Item not found", a blank or missing name is a 400 "Validation failed" with the rejected field. Framework-level failures speak the same shape: an unknown route is a 404 "Route not found", malformed JSON a 400 "Malformed request body", a non-numeric id a 400 "Invalid path variable", an unsupported method a 405 "Method not allowed", and a name over 255 characters the 400 "Validation failed".
 
 ### Open the web UI (native app and Docker both run):
 ```text
@@ -85,9 +129,11 @@ Build once, then run detached in the background:
 docker compose up -d --build
 ```
 
-The app connects to the database with the `SPRING_DATASOURCE_*` variables set in `compose.yaml`, and Hibernate creates the schema in the database (ddl-auto=update in compose). The Postgres port is not published: only the app container reaches it. The app itself is published on `127.0.0.1:8090`, localhost only.
+The app connects to the database with the `SPRING_DATASOURCE_*` variables set in `compose.yaml`, then Flyway builds the schema by running the migrations in `db/migration`. Migrations work same way on the embedded H2 in native development and tests. Only the app container reaches the Postgres port. The app itself is published on `127.0.0.1:8090`, localhost only.
 
-Data lives in the named volume postgres_data and survives docker compose down and up. Deleting the volume deletes the data.
+Compose sets `SERVER_ADDRESS: "0.0.0.0"` because an environment variable overrides `application.properties`, where the default is `127.0.0.1`. Inside the container that is right: Only the mapped port reaches the app, and it stays localhost-only on the host. A different bind is still winning by setting `SERVER_ADDRESS` in the environment, without touching the properties file.
+
+Data lives in the volume postgres_data and survives docker compose down and up. Deleting the volume deletes the data. A volume created before Flyway was introduced has no migration history and fails startup. Delete it once and a fresh start is clean.
 
 Both containers get a least-privilege runtime: the app drops every capability and runs with a read-only root filesystem (tmpfs only for /tmp), the database drops a small fixed set of capabilities it does not need.
 
@@ -95,6 +141,11 @@ Both containers get a least-privilege runtime: the app drops every capability an
 ```bash
 docker compose down
 ```
+
+## Notes from the build
+
+- **Spring Boot 4 ships auto-configurations.** `flyway-core` and `spring-boot-flyway` are needed to activate Flyway, and `flyway-database-postgresql` for the PostgreSQL dialect.
+- **A volume from before Flyway fails startup on purpose.** It has the tables but no migration history, delete it once with `docker compose down -v`, then volumes get created cleanly.
 
 ## Spring Initializr settings
 
@@ -117,6 +168,10 @@ docker compose down
 Using server port 8090 for this project everywhere as the host 8080 is already occupied by an unrelated process on the dev machine.
 
 Development now shows Hibernate's SQL in the bootRun console (spring.jpa.show-sql=true).
+
+Datasource connection is held only inside the request transaction (spring.jpa.open-in-view=false), not for the whole render.
+
+The app shuts down gracefully: Requests finish before the port closes.
 
 So this API is meant to be same-origin: The UI and the endpoints share the app on port 8090. There is no CORS configuration because of this.
 

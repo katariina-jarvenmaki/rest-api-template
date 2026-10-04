@@ -3,11 +3,13 @@ services:
   app:
     build: .
     environment:
+      # Bind all interfaces inside the container
+      SERVER_ADDRESS: "0.0.0.0"
       # Container run-mode: Quieter logs and closing database console. quieter logs, database console closed.
       # Keeping native SQL logging and the console.
       SPRING_JPA_SHOW_SQL: "false"
       SPRING_H2_CONSOLE_ENABLED: "false"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
@@ -24,7 +26,7 @@ services:
     tmpfs:
       - /tmp
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8090/items"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8090/actuator/health"]
       interval: 30s
       timeout: 5s
       retries: 3

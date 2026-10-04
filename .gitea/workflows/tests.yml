@@ -1,0 +1,13 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: gradle
+
+    steps:
+      - uses: builtin:checkout
+
+      - name: Run the tests
+        run: ./gradlew test

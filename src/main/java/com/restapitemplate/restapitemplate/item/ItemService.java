@@ -25,23 +25,26 @@ public class ItemService {
     }
 
     public Item getItem(Long id) {
+
+        // A missing row means 404. The reason becomes the title of the problem detail JSON that GlobalExceptionHandler builds.
         return itemRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Item not found"));
     }
 
     public Item createItem(Item item) {
 
-        // POST always creates a fresh row: the body's id, if any, is cleared so
-        // the database assigns one. Same ownership rule as updateItem, mirrored.
+        // POST always creates a fresh row: the body's id, if any, is cleared so the database assigns one. Same ownership rule as updateItem, mirrored.
         item.setId(null);
         return itemRepository.save(item);
     }
 
     public Item updateItem(Long id, Item item) {
 
-        // Same 404 rule as getItem: a missing row means 404, never a silent create.
+        // Same 404 rule as getItem: a missing row means 404, never a silent create. The reason is the problem detail title downstream.
         if (!itemRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Item not found");
         }
 
         // The URL decides which row is updated; the body never gets to pick a row.
@@ -51,9 +54,11 @@ public class ItemService {
 
     public void deleteItem(Long id) {
 
-        // deleteById on a missing row throws a raw exception, so we turn it into a 404 ourselves.
+        // deleteById on a missing row throws a raw exception, so we turn it
+        // into a 404 ourselves, with the same title as the other misses.
         if (!itemRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Item not found");
         }
         itemRepository.deleteById(id);
     }

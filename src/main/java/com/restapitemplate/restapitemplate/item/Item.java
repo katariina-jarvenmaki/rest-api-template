@@ -2,6 +2,7 @@ package com.restapitemplate.restapitemplate.item;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,10 +26,13 @@ public class Item {
     private Long id;
 
     // @NotBlank rejects null, empty and whitespace-only names.
+    // @Size mirrors the VARCHAR(255) columns in V1__create_items.sql
     // nullable=false becomes NOT NULL in the items table.
     @NotBlank
+    @Size(max = 255)
     @Column(nullable = false)
     private String name;
 
+    @Size(max = 255)
     private String description;
 }

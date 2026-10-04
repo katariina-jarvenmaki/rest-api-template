@@ -36,5 +36,10 @@ out/
 ### VS Code ###
 .vscode/
 
-### Secrets
+### Secrets ### 
 .env
+.env.local
+.env.*.local
+
+### Compose ### 
+compose.override.yaml

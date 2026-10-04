@@ -10,3 +10,4 @@ An overview of the build order and the decisions made along the way.
 4. Rest Api UI template on `rest_api_ui_template`: a browser UI for the same five operations, styled with vendored Simple.css, three views: List, item and form, plus a delete dialog
 5. Docker setup on `docker_setup`: container packaging, required item names, security headers
 6. PostgreSQL on `postgres_setup`: app + postgres in one compose file, credentials via a gitignored .env file (tracked .env.example placeholder only)
+7. Production readiness on `greenroom`: migrations, error handling, actuator health, OpenAPI docs, CI workflow, hardening

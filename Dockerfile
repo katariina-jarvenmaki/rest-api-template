@@ -12,7 +12,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 # Jar name tracks version in build.gradle; exact name so a -plain jar is never picked up
-COPY --from=build /home/gradle/src/build/libs/rest-api-template-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /home/gradle/src/build/libs/rest-api-template-0.1.0.jar app.jar
 # Non-root: uid 1000, no shell entry needed
 USER 1000
 EXPOSE 8090

@@ -11,3 +11,4 @@ An overview of the build order and the decisions made along the way.
 5. Docker setup on `docker_setup`: container packaging, required item names, security headers
 6. PostgreSQL on `postgres_setup`: app + postgres in one compose file, credentials via a gitignored .env file (tracked .env.example placeholder only)
 7. Production readiness on `greenroom`: migrations, error handling, actuator health, OpenAPI docs, CI workflow, hardening
+8. Release v0.1.0 on 2026-10-04: version bumped to 0.1.0 in build.gradle and the Dockerfile jar copy, RELEASE.md written at the repo root as the dated record of the same-day live verification (25 tests green, Docker run probed end to end, Flyway history checked, probe item created and deleted, baseline back to the three seed rows). This is a template rather than a runnable app: no authentication on purpose.
